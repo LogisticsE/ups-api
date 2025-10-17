@@ -19,7 +19,7 @@ from data_processor import DataProcessor
 
 app = func.FunctionApp()
 
-@app.schedule(
+@app.timer_trigger(
     schedule="0 0 * * * *",  # Every hour at minute 0
     arg_name="timer", 
     run_on_startup=False,

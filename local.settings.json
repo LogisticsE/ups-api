@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "UPS_CLIENT_ID": "OTWZhLyvtohx8Kp5V2BGkvXFLjWYgRMalPNQt46syBzTeWnb",
+    "UPS_CLIENT_SECRET": "VcxoF4n6YV9pWYhZYNPiZMsRoisKAKOJ4rOXUomdfuSmMmFPFiDAgv1YDNkRzLbL",
+    "EXCEL_FILE_PATH": "/workspaces/ups-api/Order Entry HaDEA.xlsm",
+    "DATABASE_PATH": "tracking_data.db"
+  }
+}

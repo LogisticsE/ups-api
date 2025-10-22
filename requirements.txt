@@ -2,4 +2,4 @@ azure-functions
 pandas
 openpyxl
 requests
-certifi
+certifiazure-data-tables

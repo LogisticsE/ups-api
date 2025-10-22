@@ -52,6 +52,6 @@ jobs:
       - name: 'Deploy to Azure Function App using ZIP Deploy'
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'ups-track'
+          app-name: 'ups-track-fchfcab4d6huduer'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_X1 }}
           package: deployment.zip

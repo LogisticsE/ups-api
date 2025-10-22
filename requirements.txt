@@ -1,5 +1,7 @@
 azure-functions
+azure-storage-blob
 pandas
 openpyxl
 requests
-certifiazure-data-tables
+certifi
+azure-data-tables

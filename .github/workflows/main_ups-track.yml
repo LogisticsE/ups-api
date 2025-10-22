@@ -49,9 +49,9 @@ jobs:
         with:
           name: python-app
 
-      - name: 'Deploy to Azure Function App using ZIP Deploy'
-        uses: azure/webapps-deploy@v2
+      - name: 'Deploy to Azure Function App'
+        uses: Azure/functions-action@v1
         with:
-          app-name: 'ups-track-fchfcab4d6huduer'
+          app-name: 'ups-track'
+          package: 'deployment.zip'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_X1 }}
-          package: deployment.zip

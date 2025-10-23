@@ -12,6 +12,7 @@ from modules.table_storage_manager import TableStorageManager
 from modules.excel_reader import ExcelReader
 from modules.ups_tracker import UPSTracker
 from modules.data_processor import DataProcessor
+from modules.agent_query_processor import AgentQueryProcessor, AgentResponseFormatter
 
 app = func.FunctionApp()
 
@@ -198,5 +199,104 @@ def get_tracking_status(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             body=json.dumps({"error": "Tracking number not found"}),
             status_code=404,
+            mimetype="application/json"
+        )
+
+
+@app.function_name(name="agent_query")
+@app.route(route="agent/query", methods=["GET", "POST"])
+def agent_query(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Agent-friendly query endpoint for flexible shipment searches.
+
+    Query Parameters (GET) or JSON Body (POST):
+    - destination: Search by destination (e.g., "Frankfurt", "Germany")
+    - tracking_number: Specific tracking number
+    - reference_number: Reference/PO number
+    - status: Filter by status (e.g., "Delivered", "In Transit")
+    - date_from: Start date (YYYY-MM-DD or "today", "yesterday")
+    - date_to: End date (YYYY-MM-DD or "today")
+    - limit: Max results (default: 100)
+
+    Examples:
+    - GET /agent/query?destination=Frankfurt&date_from=today
+    - POST /agent/query with JSON: {"destination": "Frankfurt", "date_from": "today"}
+    """
+
+    try:
+        # Parse parameters from either GET or POST
+        if req.method == "POST":
+            try:
+                params = req.get_json()
+            except:
+                params = {}
+        else:
+            params = {key: req.params.get(key) for key in req.params}
+
+        # Extract query parameters
+        destination = params.get('destination')
+        tracking_number = params.get('tracking_number')
+        reference_number = params.get('reference_number')
+        status = params.get('status')
+        date_from = params.get('date_from')
+        date_to = params.get('date_to')
+        limit = int(params.get('limit', 100))
+
+        # Build query summary for logging
+        query_parts = []
+        if destination:
+            query_parts.append(f"destination='{destination}'")
+        if tracking_number:
+            query_parts.append(f"tracking='{tracking_number}'")
+        if reference_number:
+            query_parts.append(f"reference='{reference_number}'")
+        if status:
+            query_parts.append(f"status='{status}'")
+        if date_from:
+            query_parts.append(f"from='{date_from}'")
+        if date_to:
+            query_parts.append(f"to='{date_to}'")
+
+        query_summary = ", ".join(query_parts) if query_parts else "all shipments"
+        logging.info(f"🤖 Agent query: {query_summary}")
+
+        # Initialize processor
+        db = TableStorageManager()
+        processor = AgentQueryProcessor(db)
+
+        # Execute query
+        shipments = processor.query_shipments(
+            destination=destination,
+            tracking_number=tracking_number,
+            reference_number=reference_number,
+            status=status,
+            date_from=date_from,
+            date_to=date_to,
+            limit=limit
+        )
+
+        # Format response
+        response = AgentResponseFormatter.format_response(shipments, query_summary)
+
+        logging.info(f"✓ Found {response['count']} shipments")
+
+        return func.HttpResponse(
+            body=json.dumps(response, indent=2, default=str),
+            status_code=200,
+            mimetype="application/json"
+        )
+
+    except Exception as e:
+        logging.error(f"Agent query error: {str(e)}", exc_info=True)
+        error_response = {
+            "success": False,
+            "error": str(e),
+            "message": "An error occurred while processing your query.",
+            "timestamp": datetime.now().isoformat()
+        }
+
+        return func.HttpResponse(
+            body=json.dumps(error_response, indent=2),
+            status_code=500,
             mimetype="application/json"
         )

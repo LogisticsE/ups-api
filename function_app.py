@@ -3,6 +3,10 @@ import logging
 from datetime import datetime, date
 import json
 
+# Reduce Azure SDK logging verbosity
+logging.getLogger('azure').setLevel(logging.WARNING)
+logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.WARNING)
+
 # Import Table Storage Manager instead of SQLite
 from modules.table_storage_manager import TableStorageManager
 from modules.excel_reader import ExcelReader
@@ -32,7 +36,7 @@ def hourly_tracking_update(myTimer: func.TimerRequest) -> None:
         logging.info(f"✓ Found {len(excel_data)} tracking numbers in Excel")
         
         # Step 2: Add new tracking numbers to database
-        logging.info("💾 Adding new tracking numbers to database...")
+        logging.info("�� Adding new tracking numbers to database...")
         new_count = db.add_new_tracking_numbers(excel_data)
         logging.info(f"✓ Added {new_count} new tracking numbers")
         
